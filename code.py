@@ -4,22 +4,33 @@ from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense
 from keras import backend as K
-import os
+import os,sys,glob
 import keras
 
+
+def get_nb_files(directory):
+  """Get number of files by searching directory recursively"""
+  if not os.path.exists(directory):
+    return 0
+  cnt = 0
+  for r, dirs, files in os.walk(directory):
+    for dr in dirs:
+      cnt += len(glob.glob(os.path.join(r, dr + "/*")))
+  return cnt
 
 # dimensions of our images.
 img_width, img_height = 150, 150
 
 train_data_dir = 'jpg'
 validation_data_dir = 'validation'
-nb_train_samples = 1210
-nb_validation_samples = 255
-epochs = 20
+nb_train_samples =get_nb_files(train_data_dir)
+nb_validation_samples = get_nb_files(validation_data_dir)
+epochs = 5
 batch_size = 10
  
 num_classes = 10
-model_name = 'logos_trained_model4.h5'
+model_name = 'logos_trained_model4.model'
+
 
 
 if K.image_data_format() == 'channels_first':
@@ -106,6 +117,7 @@ model.fit_generator(
     train_generator,
     steps_per_epoch=nb_train_samples // batch_size,
     epochs=epochs,
+    verbose=2,
     validation_data=validation_generator,
     validation_steps=nb_validation_samples // batch_size)
 
